@@ -237,8 +237,8 @@
 				this.timeline.date= "";
 				this.timeline.description= "";
 				this.timeline.activity= "";
-				this.timeline.status = true;
-				this.$v.press.$reset();
+				this.timeline.status = true;				
+				this.$v.$reset();
 		            
         	},
         	resetPress: function() {
@@ -248,8 +248,11 @@
 	            this.press.url = "";
 				this.press.title = "";
 				this.press.status  = true;				
-				this.$v.$reset()
+				this.$v.press.$reset();
         	}
 		}
 	}
 </script>
+<style>
+
+</style>

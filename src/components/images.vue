@@ -1,10 +1,9 @@
 <template>
  	<v-layout id="imgLoad" row wrap>
  		<v-flex xs12 sm6 md4
- 			v-for="(image,index) in images"
- 		 	v-if="image.url_z" >
- 			<v-card>
-				<v-card-media
+ 			v-for="image in images" :key="image.url_z">
+ 			<v-card v-if="image.url_z">
+				<v-card-media					
 					:src="image.url_z"
 					height="200px">
 				
@@ -74,6 +73,6 @@
 	    }
 	};
 </script>
-<style >
+<style>
 
 </style>

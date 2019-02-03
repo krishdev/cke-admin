@@ -47,24 +47,24 @@
       	email: "",
       	password:""
       }
-    }),
+		}),
     props: {
       source: String
     },
     computed: {
-		passwordErrors () {
-	        const errors = []
-	        if (!this.$v.form.password.$dirty) return errors	  
-	        !this.$v.form.password.required && errors.push('Name is required.')
-	        return errors
-		},
-		emailErrors () {
-			const errors = []
-			if (!this.$v.form.email.$dirty) return errors
-			!this.$v.form.email.email && errors.push('Must be valid e-mail')
-			!this.$v.form.email.required && errors.push('E-mail is required')
-			return errors
-		}
+			passwordErrors () {
+						const errors = []
+						if (!this.$v.form.password.$dirty) return errors	  
+						!this.$v.form.password.required && errors.push('Name is required.')
+						return errors
+			},
+			emailErrors () {
+				const errors = []
+					if (!this.$v.form.email.$dirty) return errors
+					!this.$v.form.email.email && errors.push('Must be valid e-mail')
+					!this.$v.form.email.required && errors.push('E-mail is required')
+					return errors
+			}
     },
     validations:{
         form:{
@@ -78,7 +78,9 @@
         }
     },
     created: function(){
-    	this.$emit("nav-show",false,"Login");
+			this.$emit("nav-show",false,"Login");
+			let $mainContent = document.querySelector("main.content");
+			if($mainContent) $mainContent.classList.add("removePadding");
     },
     methods:{
     	login: function(argument) {
@@ -87,9 +89,10 @@
     		if(!self.$v.form.$invalid){
     			window.fb.signInWithEmailAndPassword(self.form.email, self.form.password)
                 .then(function(result) {
-                    self.user = result.user; 
-                    debugger;
+                    self.user = result.user;
                     if(result.user.emailVerified || self.user){
+												let $mainContent = document.querySelector("main.content");
+												if($mainContent) $mainContent.classList.remove("removePadding");
                         self.$router.push("/");
                         this.$parent.$emit("nav_show",true);
                     }else{
@@ -109,5 +112,7 @@
   }
 </script>
 <style>
-	
+	.content.removePadding {
+		padding: 0!important;
+	}
 </style>

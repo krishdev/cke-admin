@@ -4,7 +4,7 @@
 		row
       	wrap :d-flex="breakpoint.Grid" grid-list-xl>
       	<v-flex xs12>
-      		<v-layout  row wrap>
+      		<v-layout row wrap>
 				<v-flex xs12>
 				   	<v-btn
 				   	  round
@@ -44,16 +44,32 @@
 	                </v-text-field>
 	            </v-flex>
 	            <v-flex xs12>
-	            	<v-text-field
-	                  v-model="posts.date"
-	                  :error-messages="dateErrors"                  
-	                  label="Date"
-	                  required
-	                  @input="$v.posts.date.$touch()"
-	                  @blur="$v.posts.date.$touch()">                  
-	                </v-text-field>
+					<v-menu
+						ref="menu1"
+						:close-on-content-click="false"
+						v-model="menu1"
+						:nudge-right="40"
+						lazy
+						transition="scale-transition"
+						offset-y
+						full-width
+						max-width="290px"
+						min-width="290px"
+						>
+						<v-text-field
+							slot="activator"
+							v-model="dateFormatted"
+							label="Date"
+							hint="MM/DD/YYYY format"
+							persistent-hint
+							readonly
+							prepend-icon="event"
+							@blur="date = parseDate(dateFormatted)"
+						></v-text-field>
+						<v-date-picker v-model="posts.date" no-title @input="menu1 = false"></v-date-picker>
+					</v-menu>
 	            </v-flex>
-	            <v-flex xs12 v-for="(post,index) in posts.contents">
+	            <v-flex xs12 v-for="post in posts.contents" :key="post.paraTitle">
 	            	<v-card-text>
 		            	<v-text-field 
 			            	v-model="post.paraTitle" 
@@ -61,10 +77,8 @@
 		            	</v-text-field>
 		            </v-card-text>
 		            <v-flex xs12>
-		            	<v-text-field 
-			            	v-model="post.para" 
-			            	label="Paragraph">            		
-		            	</v-text-field>
+						<label style="padding-bottom:5px;margin-bottom: 5px;display: inline-block;color: #8b8b8b;font-size: 16px;">Content</label>
+						<quill-editor v-model="post.para" :options="editorOption"></quill-editor>
 		            </v-flex>
 		            <v-flex xs12>
 		            	<v-layout  row wrap>
@@ -98,22 +112,49 @@
 	            	<v-btn @click="createThePost" color="info">Create Post<v-icon right dark>create</v-icon></v-btn>		
 	            </v-flex>
 			</v-layout>
-      	</v-flex>		
+      	</v-flex>
+		<v-dialog
+			v-model="postSuccess"
+			width="500"
+			>
+			<v-card>
+				<v-card-text>
+					Post Created Successfully.
+				</v-card-text>
+
+				<v-divider></v-divider>
+
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn
+					color="primary"
+					flat
+					@click="postSuccess = false"
+					>
+					OK
+					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</v-container>
 </template>
 <script>
+	
 	import { validationMixin } from 'vuelidate'
   	import { required, maxLength, email } from 'vuelidate/lib/validators'
   	import { db,storageRef } from '../main'
-  	
+	  	
 	export default {
 		name: "WriteArticle",		
     	mixins: [validationMixin],    	
-		data: () => ({
+		data: vm => ({
+			dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
+			menu1: false,
 			posts: {
                 heading:"",
                 subTitle:"",
-                date:"",
+				//date:"",
+				date: new Date().toISOString().substr(0, 10),
                 imgPoster:"",                    
                 contents: [{
                     "paraTitle":"",
@@ -132,7 +173,30 @@
 		    breakpoint: {
 		    	Grid: false
 		    },
-		    postSuccess: false
+			postSuccess: false,
+			editorOption: {
+				modules: {
+					toolbar: [
+					['bold', 'italic', 'underline', 'strike'],
+					['blockquote', 'code-block'],
+					[{ 'header': 1 }, { 'header': 2 }],
+					[{ 'list': 'ordered' }, { 'list': 'bullet' }],
+					[{ 'script': 'sub' }, { 'script': 'super' }],
+					[{ 'indent': '-1' }, { 'indent': '+1' }],
+					[{ 'direction': 'rtl' }],
+					[{ 'size': ['small', false, 'large', 'huge'] }],
+					[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+					[{ 'font': [] }],
+					[{ 'color': [] }, { 'background': [] }],
+					[{ 'align': [] }],
+					['clean'],
+					['link', 'video']
+					],
+					syntax: {
+					highlight: text => hljs.highlightAuto(text).value
+					}
+				}
+			}
 		}),
 		mounted () {
 			this.onResize()
@@ -161,7 +225,7 @@
 		        if (!this.$v.posts.date.$dirty) return errors
 		        !this.$v.posts.date.required && errors.push('Date is required.')
 		        return errors
-	      	}	
+			}		
 	    },	    
 	    validations:{
 	        posts:{
@@ -183,6 +247,18 @@
 			this.$emit("nav-show", true, "WriteArticle", false);
 		},
 		methods: {
+			formatDate (date) {
+				if (!date) return null
+
+				const [year, month, day] = date.split('-')
+				return `${day}/${month}/${year}`
+			},
+			parseDate (date) {
+				if (!date) return null
+
+				const [month, day, year] = date.split('/')
+				return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`
+			},
 			onResize () {
 				this.windowSize = { 
 					x: window.innerWidth, 
@@ -214,7 +290,7 @@
 
 	            setTimeout(function() {
 	            	self.postSuccess = false;
-	            },2000);
+	            },3000);
 	        },
 	        showNavRight: function () {
 	        	this.$emit("nav-show-right", true);
@@ -245,8 +321,17 @@
 	                    },
 	                    "showImg": false
 	                }]
-	            }
+				};
+				this.$v.$reset();
         	}
+		},
+		watch: {
+			'posts.date' (val) {
+				this.dateFormatted = this.formatDate(val);
+			}
 		}
 	}
 </script>
+<style>
+
+</style>

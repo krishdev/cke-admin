@@ -338,7 +338,7 @@
 							"description" : timeline.description,
 							"activity" : timeline.activity,
 							"date": moment(timeline.date, "DD/MM/YYYY")._i,
-							"status": true
+							"status": isDltd ? false : true
 						};
 						db.ref("timeline").update(update, function(response){
 							
@@ -346,7 +346,7 @@
 							setTimeout(function(){
 								self.editTSuccess = false;
 								self.dialog = false;
-							},2000);
+							},1500);
 						});          
 					});   
 				}
@@ -367,7 +367,7 @@
 		              "url" : press.url,
 		              "title" : press.title,
 									"date": moment(press.date, "DD/MM/YYYY")._i,
-									"status": true
+									"status": isDltd ? false : true
 		            };
 		            db.ref("press").update(update, function(response){
 		              self.editSuccess = true;                      
@@ -409,5 +409,5 @@
 	}
 </script>
 <style>
-	@import "../assets/css/styles.css"
+	@import "../assets/css/styles.css";
 </style>
