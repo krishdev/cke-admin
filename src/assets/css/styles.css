@@ -1,0 +1,9 @@
+.rowTable th.column.text-xs-left {
+    font-weight: bolder;
+    font-size: 1.5em;
+    color: #fff ;
+    background: #FFC107;
+}
+.timeline.rowTable th {
+	background: #4CAF50 !important;
+}
